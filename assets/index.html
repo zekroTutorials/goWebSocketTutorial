@@ -3,18 +3,17 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Websocket Test</title>
+    <title>WebSocket Tutorial</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" /> -->
     <!-- <script src="main.js"></script> -->
 </head>
 <body>
-    
-    <input type="text" autocomplete="off" id="input">
+    <input type="text" id="input" autocomplete="off">
     <button id="send">Send</button>
-
+    
     <script>
-
+    
     var input = document.querySelector('#input');
     var button = document.querySelector('#send');
 
@@ -22,44 +21,44 @@
         this.ws = new WebSocket(url);
         this.eventListener = {};
 
-        this.on = (event, cb) => this.eventListener[event] = cb;
+        this.on = (eventName, cb) => this.eventListener[eventName] = cb;
 
         this.emit = (name, data) => {
             let event = {
-                event: name, 
-                data: data,
-            }
+                event: name,
+                data: data
+            };
             let rawData = JSON.stringify(event);
             this.ws.send(rawData);
-        }
+        };
 
         this.ws.onmessage = (response) => {
             try {
                 let data = JSON.parse(response.data);
                 if (data) {
-                    let cb = this.eventListener[data.event]
+                    let cb = this.eventListener[data.event];
                     if (cb)
-                        cb(data.data)
+                        cb(data.data);
                 }
-            } catch (e) {
-                console.log(e)
+            } catch(e) {
+                window.alert(e);
             }
         }
     }
 
-    var ws = new WsClient('ws://' + window.location.origin.replace('http://', '') + '/ws')
+    var ws = new WsClient('ws://' + window.location.origin.replace(/((http)|(https)):\/\//gm, '') + '/ws');
 
     ws.on('response', (data) => {
-        console.log('response: ', data)
+        console.log("response:", data);
         let msg = document.createElement('p');
         msg.innerText = data;
         document.body.appendChild(msg);
-    })
+    });
 
     button.onclick = () => {
         ws.emit('message', input.value);
-    }
+    };
+    
     </script>
-
 </body>
 </html>

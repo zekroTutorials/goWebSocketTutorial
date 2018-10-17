@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -12,16 +13,19 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		ws, err := NewWebSocket(w, r)
 		if err != nil {
-			panic(err)
+			log.Println("Error creating websocket connection: %v", err)
+			return
 		}
 		ws.On("message", func(e *Event) {
-			log.Printf("[MESSAGE] %v", e.Data)
+			log.Printf("Message received: %s", e.Data.(string))
 			ws.Out <- (&Event{
 				Name: "response",
-				Data: e.Data,
+				Data: strings.ToUpper(e.Data.(string)),
 			}).Raw()
 		})
 	})
 
+	log.Println("WebServer listening on port 8080")
 	http.ListenAndServe(":8080", nil)
+
 }
